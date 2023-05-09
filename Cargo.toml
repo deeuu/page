@@ -18,7 +18,6 @@ age = "0.5"
 anyhow = "1.0"
 secrecy = "0.7"
 rpassword = "5.0"
-structopt = {version="0.3", features=["color"]}
 lazy_static = "1.4"
 clipboard = "0.5"
 directories-next = "2.0"
@@ -26,7 +25,7 @@ toml = "0.5"
 serde =  {version = "1.0", features=["derive"]}
 keyring = "0.10"
 whoami = "1.1"
-
+clap = { version = "4.2.2", features = ["derive"]}
 
 [target.'cfg(unix)'.dependencies]
 fork = "0.1"
