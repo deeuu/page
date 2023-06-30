@@ -1,6 +1,6 @@
 use crate::paths::entries_file;
 use crate::utilities::{decrypt, encrypt};
-use anyhow::{anyhow, Result};
+use anyhow::{anyhow, Context, Result};
 use secrecy::Secret;
 use serde::{Deserialize, Serialize};
 use std::{
@@ -16,15 +16,18 @@ pub struct Storage {
     pub entries: HashMap<String, Entry>,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Entry {
     pub password: String,
+    pub username: Option<String>,
+    pub url: Option<String>,
 }
 
 pub fn load_entries(passphrase: &Secret<String>) -> Result<Storage> {
     let mut encrypted: Vec<u8> = vec![];
-    let file = match fs::metadata(entries_file()?) {
-        Ok(_) => File::open(entries_file()?)?,
+    let entries_file_path = entries_file()?;
+    let file = match fs::metadata(&entries_file_path) {
+        Ok(_) => File::open(&entries_file_path)?,
         Err(_) => return Err(anyhow!("storage not initialized, run `passage init`")),
     };
     let mut buf = BufReader::new(file);
@@ -34,7 +37,8 @@ pub fn load_entries(passphrase: &Secret<String>) -> Result<Storage> {
             entries: HashMap::new(),
         })
     } else {
-        let decrypted = decrypt(&encrypted, passphrase)?;
+        let decrypted = decrypt(&encrypted, passphrase)
+            .with_context(|| format!("Failed to decrypt entries file {}", entries_file_path))?;
         let decrypted = String::from_utf8(decrypted)?;
         let decrypted: Storage = toml::from_str(&decrypted)?;
         Ok(decrypted)

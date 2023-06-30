@@ -1,4 +1,4 @@
-use clap::{Parser, Subcommand};
+use clap::{Parser, Subcommand, ValueEnum};
 
 #[derive(Parser)]
 pub struct Cli {
@@ -15,19 +15,46 @@ pub enum Cmd {
     /// Initialize the password store
     Init,
     /// Add a new entry
-    New,
+    New {
+        entry_name: String,
+
+        #[arg(long, short)]
+        username: Option<String>,
+
+        #[arg(long)]
+        url: Option<String>,
+    },
     /// List all known entries
     List,
     /// Decrypt and show an entry
     Show {
-        entry: String,
+        entry_name: String,
+
+        // show all fields associated with this entry
+        #[arg(long, short, value_enum, default_value_t = EntryAttribute::Password)]
+        attribute: EntryAttribute,
 
         #[arg(long, short)]
-        /// Print the password instead of copying it to the clipboard
+        /// Print instead of copying it to the clipboard
         on_screen: bool,
     },
     /// Edit an entry
-    Edit { entry: String },
+    Edit {
+        entry_name: String,
+
+        #[arg(long, short)]
+        new_name: Option<String>,
+
+        #[arg(long, short)]
+        username: Option<String>,
+
+        #[arg(long)]
+        url: Option<String>,
+
+        #[arg(long)]
+        /// Do not display a prompt for entering a new password
+        no_prompt: bool,
+    },
     /// Remove an entry
     Remove { entry: String },
     /// Display status information
@@ -37,6 +64,13 @@ pub enum Cmd {
         #[command(subcommand)]
         cmd: KeyringCmd,
     },
+}
+
+#[derive(ValueEnum, Clone)]
+pub enum EntryAttribute {
+    Password,
+    Username,
+    Url,
 }
 
 #[derive(Subcommand)]

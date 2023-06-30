@@ -1,3 +1,4 @@
+use crate::cli::EntryAttribute;
 use crate::entries::{load_entries, save_entries, Entry, Storage};
 use crate::hooks::{run_hook, Hook, HookEvent};
 use crate::paths::{entries_file, hooks_dir, storage_dir};
@@ -11,32 +12,30 @@ use std::io::Write;
 pub fn init(no_keyring: bool) -> Result<(), Error> {
     fs::create_dir_all(storage_dir()?)?;
     let path = entries_file()?;
-    if fs::metadata(path).is_err() {
+    if fs::metadata(&path).is_err() {
         fs::File::create(entries_file()?)?;
+        println!("Created entries file {}", path);
         let passphrase = utilities::get_passphrase("Passphrase: ", no_keyring)?;
         let entries: Storage = toml::from_str("")?;
         save_entries(passphrase, &entries)?
+    } else {
+        println!("Entries file {} already exists", path);
     }
     Ok(())
 }
 
-pub fn new_entry(no_keyring: bool) -> Result<(), Error> {
+pub fn new_entry(
+    entry: String,
+    username: Option<String>,
+    url: Option<String>,
+    no_keyring: bool,
+) -> Result<(), Error> {
     run_hook(&Hook::PreLoad, &HookEvent::NewEntry)?;
     let passphrase = utilities::get_passphrase("Passphrase: ", no_keyring)?;
     let mut storage = load_entries(&passphrase)?;
 
-    print!("New entry: ");
-    io::stdout().flush()?;
-    let mut entry = String::new();
-    io::stdin().read_line(&mut entry)?;
-    let entry = entry.trim();
-
-    if storage.entries.contains_key(entry) {
-        print!("'{}' already exists. Overwrite (y/N)? ", entry);
-        io::stdout().flush()?;
-        let mut overwrite = String::new();
-        io::stdin().read_line(&mut overwrite)?;
-        let overwrite = overwrite.trim();
+    if storage.entries.contains_key(&entry) {
+        let overwrite = utilities::read_stdin("Entry already exists. Overwrite (y/N)?")?;
         if overwrite.to_uppercase() != "Y" {
             return Ok(());
         }
@@ -48,9 +47,11 @@ pub fn new_entry(no_keyring: bool) -> Result<(), Error> {
     ))?);
 
     storage.entries.insert(
-        entry.to_owned(),
+        entry,
         Entry {
             password: password.expose_secret().to_string(),
+            username,
+            url,
         },
     );
 
@@ -71,21 +72,37 @@ pub fn list(no_keyring: bool) -> Result<(), Error> {
     Ok(())
 }
 
-pub fn show(entry: &str, on_screen: bool, no_keyring: bool) -> Result<()> {
+pub fn show(
+    entry: &str,
+    attribute: EntryAttribute,
+    on_screen: bool,
+    no_keyring: bool,
+) -> Result<()> {
     run_hook(&Hook::PreLoad, &HookEvent::ShowEntry)?;
     let passphrase = utilities::get_passphrase("Enter passphrase: ", no_keyring)?;
     let storage = load_entries(&passphrase)?;
+
     if storage.entries.contains_key(entry) {
-        let password = &storage
+        let entry = storage
             .entries
             .get(entry)
-            .ok_or_else(|| anyhow!("entry {} not found", entry))?
-            .password;
-        if on_screen {
-            println!("{}", password);
-        } else {
-            utilities::copy_to_clipboard(password.to_string())?;
-        }
+            .ok_or_else(|| anyhow!("{} not found", entry))?;
+
+        match attribute {
+            EntryAttribute::Password => {
+                utilities::reveal(&entry.password, on_screen)?;
+            }
+            EntryAttribute::Username => {
+                if let Some(u) = &entry.username {
+                    utilities::reveal(u, on_screen)?;
+                }
+            }
+            EntryAttribute::Url => {
+                if let Some(u) = &entry.url {
+                    utilities::reveal(u, on_screen)?;
+                }
+            }
+        };
     } else {
         return Err(anyhow!("{} not found", entry));
     }
@@ -93,18 +110,54 @@ pub fn show(entry: &str, on_screen: bool, no_keyring: bool) -> Result<()> {
     Ok(())
 }
 
-pub fn edit(entry: &str, no_keyring: bool) -> Result<()> {
+pub fn edit(
+    entry_name: String,
+    new_name: Option<String>,
+    username: Option<String>,
+    url: Option<String>,
+    no_prompt: bool,
+    no_keyring: bool,
+) -> Result<()> {
     run_hook(&Hook::PreLoad, &HookEvent::ShowEntry)?;
     let passphrase = utilities::get_passphrase("Enter passphrase: ", no_keyring)?;
     let mut storage = load_entries(&passphrase)?;
-    if storage.entries.contains_key(entry) {
-        let password = rpassword::prompt_password_stdout(&format!("New password for {}: ", entry))?;
-        storage.entries.insert(entry.to_owned(), Entry { password });
-        save_entries(passphrase, &storage)?;
-        run_hook(&Hook::PostSave, &HookEvent::EditEntry)?;
-    } else {
-        return Err(anyhow!("entry not found: {}", entry));
+
+    let entry = storage
+        .entries
+        .remove(&entry_name)
+        .ok_or_else(|| anyhow!("entry {} not found", entry_name))?;
+
+    let name = match new_name {
+        Some(u) => u,
+        None => entry_name,
     };
+
+    let username = match username {
+        Some(u) => Some(u),
+        None => entry.username,
+    };
+
+    let url = match url {
+        Some(u) => Some(u),
+        None => entry.url,
+    };
+
+    let password = match no_prompt {
+        true => entry.password,
+        false => rpassword::prompt_password_stdout(&format!("New password for {}: ", name))?,
+    };
+
+    storage.entries.insert(
+        name,
+        Entry {
+            password,
+            username,
+            url,
+        },
+    );
+
+    save_entries(passphrase, &storage)?;
+    run_hook(&Hook::PostSave, &HookEvent::EditEntry)?;
 
     Ok(())
 }
