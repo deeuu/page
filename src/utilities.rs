@@ -3,6 +3,7 @@ use clipboard::ClipboardContext;
 use clipboard::ClipboardProvider;
 use keyring::Keyring;
 use secrecy::Secret;
+use std::io;
 use std::io::{Read, Write};
 
 pub fn encrypt(plaintext: &[u8], passphrase: Secret<String>) -> Result<Vec<u8>, Error> {
@@ -66,6 +67,24 @@ pub fn get_passphrase(prompt: &str, no_keyring: bool) -> Result<Secret<String>> 
     } else {
         get_passphrase_keyring(prompt)
     }
+}
+
+pub fn read_stdin(msg: &str) -> Result<String> {
+    print!("{}", msg);
+    io::stdout().flush()?;
+    let mut entry = String::new();
+    io::stdin().read_line(&mut entry)?;
+    let entry = entry.trim();
+    Ok(entry.to_owned())
+}
+
+pub fn reveal(attribute: &String, on_screen: bool) -> Result<()> {
+    if on_screen {
+        println!("{}", attribute);
+    } else {
+        copy_to_clipboard(attribute.to_string())?;
+    }
+    Ok(())
 }
 
 #[cfg(target_os = "linux")]
