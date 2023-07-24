@@ -21,11 +21,9 @@ fn sanity() {
         .arg("--help")
         .assert()
         .success()
-        .stdout(
-            predicate::str::starts_with("page ").and(predicate::str::contains(
-                "Password manager with age encryption",
-            )),
-        );
+        .stdout(predicate::str::starts_with(
+            "A password manager with age encryption",
+        ));
 }
 
 #[test]
