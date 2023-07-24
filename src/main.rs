@@ -9,7 +9,7 @@ mod commands;
 use cli::{Cli, Cmd, KeyringCmd};
 
 fn main() -> Result<()> {
-    let opt = Cli::try_parse()?;
+    let opt = Cli::parse();
 
     match opt.cmd {
         Cmd::Init => commands::init(opt.no_keyring),
