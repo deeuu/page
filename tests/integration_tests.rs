@@ -1,8 +1,8 @@
 use assert_cmd::Command;
 use predicates::prelude::*;
 
-fn passage() -> Command {
-    Command::cargo_bin("passage").unwrap()
+fn page() -> Command {
+    Command::cargo_bin("page").unwrap()
 }
 
 fn tempdir() -> tempfile::TempDir {
@@ -11,18 +11,18 @@ fn tempdir() -> tempfile::TempDir {
 
 #[test]
 fn sanity() {
-    passage()
+    page()
         .arg("--version")
         .assert()
         .success()
-        .stdout(predicate::str::starts_with("passage "));
+        .stdout(predicate::str::starts_with("page "));
 
-    passage()
+    page()
         .arg("--help")
         .assert()
         .success()
         .stdout(
-            predicate::str::starts_with("passage ").and(predicate::str::contains(
+            predicate::str::starts_with("page ").and(predicate::str::contains(
                 "Password manager with age encryption",
             )),
         );
@@ -32,15 +32,15 @@ fn sanity() {
 fn info() {
     let dir = tempdir();
 
-    passage()
-        .env("PASSAGE_STORAGE_FOLDER", dir.path())
+    page()
+        .env("PAGE_STORAGE_FOLDER", dir.path())
         .arg("--no-keyring")
         .arg("init")
         .assert()
         .success();
 
-    passage()
-        .env("PASSAGE_STORAGE_FOLDER", dir.path())
+    page()
+        .env("PAGE_STORAGE_FOLDER", dir.path())
         .arg("info")
         .assert()
         .success()
@@ -56,15 +56,15 @@ fn info() {
 fn switch_storage_folder() {
     let dir = tempdir();
 
-    passage()
-        .env("PASSAGE_STORAGE_FOLDER", dir.path())
+    page()
+        .env("PAGE_STORAGE_FOLDER", dir.path())
         .arg("--no-keyring")
         .arg("init")
         .assert()
         .success();
 
-    passage()
-        .env("PASSAGE_STORAGE_FOLDER", dir.path())
+    page()
+        .env("PAGE_STORAGE_FOLDER", dir.path())
         .arg("--no-keyring")
         .arg("info")
         .assert()
@@ -82,8 +82,8 @@ fn new_show_list() {
     let entry = "entry";
     let password = "password";
 
-    passage()
-        .env("PASSAGE_STORAGE_FOLDER", dir.path())
+    page()
+        .env("PAGE_STORAGE_FOLDER", dir.path())
         .arg("--no-keyring")
         .arg("init")
         .write_stdin(format!("{}\n", passphrase))
@@ -91,8 +91,8 @@ fn new_show_list() {
         .stdout(predicate::str::starts_with("Passphrase: "))
         .success();
 
-    passage()
-        .env("PASSAGE_STORAGE_FOLDER", dir.path())
+    page()
+        .env("PAGE_STORAGE_FOLDER", dir.path())
         .arg("--no-keyring")
         .arg("new")
         .write_stdin(format!("{}\n{}\n{}", passphrase, entry, password))
@@ -100,8 +100,8 @@ fn new_show_list() {
         .stdout(format!("Passphrase: New entry: Password for {}: ", entry))
         .success();
 
-    passage()
-        .env("PASSAGE_STORAGE_FOLDER", dir.path())
+    page()
+        .env("PAGE_STORAGE_FOLDER", dir.path())
         .arg("--no-keyring")
         .arg("list")
         .write_stdin(format!("{}\n", passphrase))
@@ -109,8 +109,8 @@ fn new_show_list() {
         .stdout(format!("Enter passphrase: {}\n", entry))
         .success();
 
-    passage()
-        .env("PASSAGE_STORAGE_FOLDER", dir.path())
+    page()
+        .env("PAGE_STORAGE_FOLDER", dir.path())
         .arg("--no-keyring")
         .arg("show")
         .arg("--on-screen")
@@ -129,8 +129,8 @@ fn edit_entry() {
     let password = "password";
     let new_password = "password2";
 
-    passage()
-        .env("PASSAGE_STORAGE_FOLDER", dir.path())
+    page()
+        .env("PAGE_STORAGE_FOLDER", dir.path())
         .arg("--no-keyring")
         .arg("init")
         .write_stdin(format!("{}\n", passphrase))
@@ -138,8 +138,8 @@ fn edit_entry() {
         .stdout(predicate::str::starts_with("Passphrase: "))
         .success();
 
-    passage()
-        .env("PASSAGE_STORAGE_FOLDER", dir.path())
+    page()
+        .env("PAGE_STORAGE_FOLDER", dir.path())
         .arg("--no-keyring")
         .arg("new")
         .write_stdin(format!("{}\n{}\n{}", passphrase, entry, password))
@@ -147,8 +147,8 @@ fn edit_entry() {
         .stdout(format!("Passphrase: New entry: Password for {}: ", entry))
         .success();
 
-    passage()
-        .env("PASSAGE_STORAGE_FOLDER", dir.path())
+    page()
+        .env("PAGE_STORAGE_FOLDER", dir.path())
         .arg("--no-keyring")
         .arg("show")
         .arg("--on-screen")
@@ -158,8 +158,8 @@ fn edit_entry() {
         .stdout(format!("Enter passphrase: {}\n", password))
         .success();
 
-    passage()
-        .env("PASSAGE_STORAGE_FOLDER", dir.path())
+    page()
+        .env("PAGE_STORAGE_FOLDER", dir.path())
         .arg("--no-keyring")
         .arg("edit")
         .arg(entry)
@@ -168,8 +168,8 @@ fn edit_entry() {
         .stdout("Enter passphrase: New password for editable: ")
         .success();
 
-    passage()
-        .env("PASSAGE_STORAGE_FOLDER", dir.path())
+    page()
+        .env("PAGE_STORAGE_FOLDER", dir.path())
         .arg("--no-keyring")
         .arg("show")
         .arg("--on-screen")
@@ -187,8 +187,8 @@ fn remove_entry() {
     let entry = "begone";
     let password = "pw";
 
-    passage()
-        .env("PASSAGE_STORAGE_FOLDER", dir.path())
+    page()
+        .env("PAGE_STORAGE_FOLDER", dir.path())
         .arg("--no-keyring")
         .arg("init")
         .write_stdin(format!("{}\n", passphrase))
@@ -196,8 +196,8 @@ fn remove_entry() {
         .stdout(predicate::str::starts_with("Passphrase: "))
         .success();
 
-    passage()
-        .env("PASSAGE_STORAGE_FOLDER", dir.path())
+    page()
+        .env("PAGE_STORAGE_FOLDER", dir.path())
         .arg("--no-keyring")
         .arg("new")
         .write_stdin(format!("{}\n{}\n{}", passphrase, entry, password))
@@ -205,8 +205,8 @@ fn remove_entry() {
         .stdout(format!("Passphrase: New entry: Password for {}: ", entry))
         .success();
 
-    passage()
-        .env("PASSAGE_STORAGE_FOLDER", dir.path())
+    page()
+        .env("PAGE_STORAGE_FOLDER", dir.path())
         .arg("--no-keyring")
         .arg("list")
         .write_stdin(format!("{}\n", passphrase))
@@ -214,8 +214,8 @@ fn remove_entry() {
         .stdout(format!("Enter passphrase: {}\n", entry))
         .success();
 
-    passage()
-        .env("PASSAGE_STORAGE_FOLDER", dir.path())
+    page()
+        .env("PAGE_STORAGE_FOLDER", dir.path())
         .arg("--no-keyring")
         .arg("remove")
         .arg(entry)
@@ -224,8 +224,8 @@ fn remove_entry() {
         .stdout("Enter passphrase: ")
         .success();
 
-    passage()
-        .env("PASSAGE_STORAGE_FOLDER", dir.path())
+    page()
+        .env("PAGE_STORAGE_FOLDER", dir.path())
         .arg("--no-keyring")
         .arg("list")
         .write_stdin(format!("{}\n", passphrase))
@@ -237,43 +237,43 @@ fn remove_entry() {
 #[test]
 fn fail_list_no_init() {
     let dir = tempdir();
-    passage()
-        .env("PASSAGE_STORAGE_FOLDER", dir.path())
+    page()
+        .env("PAGE_STORAGE_FOLDER", dir.path())
         .arg("--no-keyring")
         .arg("list")
         .assert()
         .failure()
         .stderr(predicate::str::starts_with(
-            "Error: storage not initialized, run `passage init`",
+            "Error: storage not initialized, run `page init`",
         ));
 }
 
 #[test]
 fn fail_show_no_init() {
     let dir = tempdir();
-    passage()
-        .env("PASSAGE_STORAGE_FOLDER", dir.path())
+    page()
+        .env("PAGE_STORAGE_FOLDER", dir.path())
         .arg("--no-keyring")
         .arg("show")
         .arg("foo")
         .assert()
         .failure()
         .stderr(predicate::str::starts_with(
-            "Error: storage not initialized, run `passage init`",
+            "Error: storage not initialized, run `page init`",
         ));
 }
 
 #[test]
 fn fail_new_no_init() {
     let dir = tempdir();
-    passage()
-        .env("PASSAGE_STORAGE_FOLDER", dir.path())
+    page()
+        .env("PAGE_STORAGE_FOLDER", dir.path())
         .arg("--no-keyring")
         .arg("new")
         .assert()
         .failure()
         .stderr(predicate::str::starts_with(
-            "Error: storage not initialized, run `passage init`",
+            "Error: storage not initialized, run `page init`",
         ));
 }
 
@@ -282,8 +282,8 @@ fn fail_edit_no_entry() {
     let dir = tempdir();
     let passphrase = "fail";
 
-    passage()
-        .env("PASSAGE_STORAGE_FOLDER", dir.path())
+    page()
+        .env("PAGE_STORAGE_FOLDER", dir.path())
         .arg("--no-keyring")
         .arg("init")
         .write_stdin(format!("{}\n", passphrase))
@@ -291,8 +291,8 @@ fn fail_edit_no_entry() {
         .stdout(predicate::str::starts_with("Passphrase: "))
         .success();
 
-    passage()
-        .env("PASSAGE_STORAGE_FOLDER", dir.path())
+    page()
+        .env("PAGE_STORAGE_FOLDER", dir.path())
         .arg("--no-keyring")
         .arg("edit")
         .arg("404")
@@ -308,8 +308,8 @@ fn fail_remove_no_entry() {
     let dir = tempdir();
     let passphrase = "no_entry_no_remove";
 
-    passage()
-        .env("PASSAGE_STORAGE_FOLDER", dir.path())
+    page()
+        .env("PAGE_STORAGE_FOLDER", dir.path())
         .arg("--no-keyring")
         .arg("init")
         .write_stdin(format!("{}\n", passphrase))
@@ -317,8 +317,8 @@ fn fail_remove_no_entry() {
         .stdout(predicate::str::starts_with("Passphrase: "))
         .success();
 
-    passage()
-        .env("PASSAGE_STORAGE_FOLDER", dir.path())
+    page()
+        .env("PAGE_STORAGE_FOLDER", dir.path())
         .arg("--no-keyring")
         .arg("remove")
         .arg("no-entry")

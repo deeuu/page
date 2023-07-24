@@ -1,11 +1,11 @@
 [package]
-name = "passage"
+name = "page"
 version = "1.0.0-rc.2"
-authors = ["Christian Stefanescu <chris@0chris.com>"]
+authors = ["Christian Stefanescu <chris@0chris.com>", "Dominic Ward <dom@deeuu.me>"]
 edition = "2018"
 description = "A password manager with age encryption"
 license = "MIT"
-repository = "https://www.github.com/stchris/passage"
+repository = "https://www.github.com/deeuu/page"
 readme = "README.md"
 keywords = ["cli", "encryption", "age", "password", "manager"]
 categories = ["command-line-utilities", "cryptography"]

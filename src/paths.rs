@@ -6,7 +6,7 @@ use std::path::Path;
 pub fn storage_dir() -> Result<String> {
     match std::env::var("PAGE_STORAGE_FOLDER") {
         Ok(f) => Ok(f),
-        Err(_) => match ProjectDirs::from("", "", "passage") {
+        Err(_) => match ProjectDirs::from("", "", "page") {
             Some(pd) => {
                 let dir = pd.data_dir().display().to_string();
                 Ok(dir)

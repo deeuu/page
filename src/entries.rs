@@ -28,7 +28,7 @@ pub fn load_entries(passphrase: &Secret<String>) -> Result<Storage> {
     let entries_file_path = entries_file()?;
     let file = match fs::metadata(&entries_file_path) {
         Ok(_) => File::open(&entries_file_path)?,
-        Err(_) => return Err(anyhow!("storage not initialized, run `passage init`")),
+        Err(_) => return Err(anyhow!("storage not initialized, run `page init`")),
     };
     let mut buf = BufReader::new(file);
     buf.read_to_end(&mut encrypted)?;

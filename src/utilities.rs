@@ -35,7 +35,7 @@ pub fn decrypt(encrypted: &[u8], passphrase: &Secret<String>) -> Result<Vec<u8>,
     Ok(decrypted)
 }
 
-const KEYRING_APP_NAME: &str = "passage";
+const KEYRING_APP_NAME: &str = "page";
 
 pub fn new_keyring(username: &str) -> Keyring {
     return Keyring::new(KEYRING_APP_NAME, username);
