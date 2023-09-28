@@ -193,16 +193,17 @@ fn remove_entry() {
         .arg("init")
         .write_stdin(format!("{}\n", passphrase))
         .assert()
-        .stdout(predicate::str::starts_with("Passphrase: "))
+        .stdout(predicate::str::contains("Enter passphrase:"))
         .success();
 
     page()
         .env("PAGE_STORAGE_FOLDER", dir.path())
         .arg("--no-keyring")
         .arg("new")
-        .write_stdin(format!("{}\n{}\n{}", passphrase, entry, password))
+        .arg(entry)
+        .write_stdin(format!("{}\n{}", passphrase, password))
         .assert()
-        .stdout(format!("Passphrase: New entry: Password for {}: ", entry))
+        .stdout(format!("Enter passphrase: Password for {}: ", entry))
         .success();
 
     page()
