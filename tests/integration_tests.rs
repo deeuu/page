@@ -121,6 +121,65 @@ fn new_show_list() {
 }
 
 #[test]
+fn new_show_attributes() {
+    let dir = tempdir();
+    let passphrase = "master";
+    let entry = "entry";
+    let password = "password";
+    let username = "username";
+    let url = "url";
+
+    page()
+        .env("PAGE_STORAGE_FOLDER", dir.path())
+        .arg("--no-keyring")
+        .arg("init")
+        .write_stdin(format!("{}\n", passphrase))
+        .assert()
+        .stdout(predicate::str::contains("Enter passphrase:"))
+        .success();
+
+    page()
+        .env("PAGE_STORAGE_FOLDER", dir.path())
+        .arg("--no-keyring")
+        .arg("new")
+        .arg(entry)
+        .arg("-u")
+        .arg(username)
+        .arg("--url")
+        .arg(url)
+        .write_stdin(format!("{}\n{}", passphrase, password))
+        .assert()
+        .stdout(format!("Enter passphrase: Password for {}: ", entry))
+        .success();
+
+    page()
+        .env("PAGE_STORAGE_FOLDER", dir.path())
+        .arg("--no-keyring")
+        .arg("show")
+        .arg(entry)
+        .arg("--on-screen")
+        .arg("--attribute")
+        .arg("username")
+        .write_stdin(format!("{}\n", passphrase))
+        .assert()
+        .stdout(format!("Enter passphrase: {}\n", username))
+        .success();
+
+    page()
+        .env("PAGE_STORAGE_FOLDER", dir.path())
+        .arg("--no-keyring")
+        .arg("show")
+        .arg(entry)
+        .arg("--on-screen")
+        .arg("--attribute")
+        .arg("url")
+        .write_stdin(format!("{}\n", passphrase))
+        .assert()
+        .stdout(format!("Enter passphrase: {}\n", url))
+        .success();
+}
+
+#[test]
 fn edit_entry() {
     let dir = tempdir();
     let passphrase = "secret";
