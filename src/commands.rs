@@ -15,7 +15,7 @@ pub fn init(no_keyring: bool) -> Result<(), Error> {
     if fs::metadata(&path).is_err() {
         fs::File::create(entries_file()?)?;
         println!("Created entries file {}", path);
-        let passphrase = utilities::get_passphrase("Passphrase: ", no_keyring)?;
+        let passphrase = utilities::get_passphrase(no_keyring)?;
         let entries: Storage = toml::from_str("")?;
         save_entries(passphrase, &entries)?
     } else {
@@ -31,7 +31,7 @@ pub fn new_entry(
     no_keyring: bool,
 ) -> Result<(), Error> {
     run_hook(&Hook::PreLoad, &HookEvent::NewEntry)?;
-    let passphrase = utilities::get_passphrase("Passphrase: ", no_keyring)?;
+    let passphrase = utilities::get_passphrase(no_keyring)?;
     let mut storage = load_entries(&passphrase)?;
 
     if storage.entries.contains_key(&entry) {
@@ -64,7 +64,7 @@ pub fn new_entry(
 pub fn list(no_keyring: bool) -> Result<(), Error> {
     run_hook(&Hook::PreLoad, &HookEvent::ListEntries)?;
 
-    let passphrase = utilities::get_passphrase("Enter passphrase: ", no_keyring)?;
+    let passphrase = utilities::get_passphrase(no_keyring)?;
     let storage = load_entries(&passphrase)?;
     for name in storage.entries.keys() {
         println!("{}", name);
@@ -79,14 +79,14 @@ pub fn show(
     no_keyring: bool,
 ) -> Result<()> {
     run_hook(&Hook::PreLoad, &HookEvent::ShowEntry)?;
-    let passphrase = utilities::get_passphrase("Enter passphrase: ", no_keyring)?;
+    let passphrase = utilities::get_passphrase(no_keyring)?;
     let storage = load_entries(&passphrase)?;
 
     if storage.entries.contains_key(entry) {
         let entry = storage
             .entries
             .get(entry)
-            .ok_or_else(|| anyhow!("{} not found", entry))?;
+            .ok_or_else(|| anyhow!("entry '{}' not found", entry))?;
 
         match attribute {
             EntryAttribute::Password => {
@@ -104,7 +104,7 @@ pub fn show(
             }
         };
     } else {
-        return Err(anyhow!("{} not found", entry));
+        return Err(anyhow!("entry '{}' not found", entry));
     }
 
     Ok(())
@@ -119,13 +119,13 @@ pub fn edit(
     no_keyring: bool,
 ) -> Result<()> {
     run_hook(&Hook::PreLoad, &HookEvent::ShowEntry)?;
-    let passphrase = utilities::get_passphrase("Enter passphrase: ", no_keyring)?;
+    let passphrase = utilities::get_passphrase(no_keyring)?;
     let mut storage = load_entries(&passphrase)?;
 
     let entry = storage
         .entries
         .remove(&entry_name)
-        .ok_or_else(|| anyhow!("entry {} not found", entry_name))?;
+        .ok_or_else(|| anyhow!("entry '{}' not found", entry_name))?;
 
     let name = match new_name {
         Some(u) => u,
@@ -164,13 +164,13 @@ pub fn edit(
 
 pub fn remove(entry: &str, no_keyring: bool) -> Result<()> {
     run_hook(&Hook::PreLoad, &HookEvent::ShowEntry)?;
-    let passphrase = utilities::get_passphrase("Enter passphrase: ", no_keyring)?;
+    let passphrase = utilities::get_passphrase(no_keyring)?;
     let mut storage = load_entries(&passphrase)?;
     if storage.entries.remove(entry).is_some() {
         save_entries(passphrase, &storage)?;
         run_hook(&Hook::PostSave, &HookEvent::RemoveEntry)?;
     } else {
-        return Err(anyhow!("entry not found: {}", entry));
+        return Err(anyhow!("entry '{}' not found", entry));
     };
 
     Ok(())

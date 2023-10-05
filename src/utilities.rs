@@ -60,7 +60,8 @@ pub fn get_passphrase_keyring(prompt: &str) -> Result<Secret<String>> {
     Ok(passphrase)
 }
 
-pub fn get_passphrase(prompt: &str, no_keyring: bool) -> Result<Secret<String>> {
+pub fn get_passphrase(no_keyring: bool) -> Result<Secret<String>> {
+    const prompt: &str = "Enter passphrase: ";
     if no_keyring {
         let passphrase = rpassword::prompt_password_stdout(prompt)?;
         Ok(Secret::new(passphrase))
