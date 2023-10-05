@@ -271,6 +271,7 @@ fn fail_new_no_init() {
         .env("PAGE_STORAGE_FOLDER", dir.path())
         .arg("--no-keyring")
         .arg("new")
+        .arg("entry")
         .assert()
         .failure()
         .stderr(predicate::str::starts_with(
@@ -289,7 +290,7 @@ fn fail_edit_no_entry() {
         .arg("init")
         .write_stdin(format!("{}\n", passphrase))
         .assert()
-        .stdout(predicate::str::starts_with("Passphrase: "))
+        .stdout(predicate::str::contains("Enter passphrase: "))
         .success();
 
     page()
@@ -301,7 +302,7 @@ fn fail_edit_no_entry() {
         .assert()
         .failure()
         .stdout("Enter passphrase: ")
-        .stderr("Error: entry not found: 404\n");
+        .stderr("Error: entry '404' not found\n");
 }
 
 #[test]
@@ -315,7 +316,7 @@ fn fail_remove_no_entry() {
         .arg("init")
         .write_stdin(format!("{}\n", passphrase))
         .assert()
-        .stdout(predicate::str::starts_with("Passphrase: "))
+        .stdout(predicate::str::contains("Enter passphrase: "))
         .success();
 
     page()
@@ -327,5 +328,5 @@ fn fail_remove_no_entry() {
         .assert()
         .failure()
         .stdout("Enter passphrase: ")
-        .stderr("Error: entry not found: no-entry\n");
+        .stderr("Error: entry 'no-entry' not found\n");
 }
