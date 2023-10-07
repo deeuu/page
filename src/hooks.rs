@@ -65,7 +65,7 @@ pub fn run_hook(hook: &Hook, event: &HookEvent) -> Result<()> {
         }
 
         if !output.status.success() {
-            anyhow!("{} hook failed", hook.name());
+            return Err(anyhow!("{} hook failed", hook.name()));
         }
     }
 

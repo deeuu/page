@@ -18,7 +18,7 @@ pub fn encrypt(plaintext: &[u8], passphrase: Secret<String>) -> Result<Vec<u8>, 
 }
 
 pub fn decrypt(encrypted: &[u8], passphrase: &Secret<String>) -> Result<Vec<u8>, Error> {
-    let decryptor = match age::Decryptor::new(&encrypted[..])? {
+    let decryptor = match age::Decryptor::new(encrypted)? {
         age::Decryptor::Passphrase(d) => d,
         age::Decryptor::Recipients(..) => unreachable!(),
     };
@@ -51,7 +51,7 @@ pub fn get_passphrase_keyring(prompt: &str) -> Result<Secret<String>> {
     } else {
         let passphrase = rpassword::prompt_password_stdout(prompt)?;
         if keyring.set_password(&passphrase).is_err() {
-            anyhow!("Failed to store password in keyring");
+            return Err(anyhow!("Failed to store password in keyring"));
         }
 
         Secret::new(passphrase)
@@ -61,12 +61,12 @@ pub fn get_passphrase_keyring(prompt: &str) -> Result<Secret<String>> {
 }
 
 pub fn get_passphrase(no_keyring: bool) -> Result<Secret<String>> {
-    const prompt: &str = "Enter passphrase: ";
+    const PROMPT: &str = "Enter passphrase: ";
     if no_keyring {
-        let passphrase = rpassword::prompt_password_stdout(prompt)?;
+        let passphrase = rpassword::prompt_password_stdout(PROMPT)?;
         Ok(Secret::new(passphrase))
     } else {
-        get_passphrase_keyring(prompt)
+        get_passphrase_keyring(PROMPT)
     }
 }
 

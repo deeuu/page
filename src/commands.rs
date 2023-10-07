@@ -6,8 +6,6 @@ use crate::utilities;
 use anyhow::{anyhow, Error, Result};
 use secrecy::{ExposeSecret, Secret};
 use std::fs;
-use std::io;
-use std::io::Write;
 
 pub fn init(no_keyring: bool) -> Result<(), Error> {
     fs::create_dir_all(storage_dir()?)?;
@@ -215,7 +213,7 @@ pub fn keyring_check() -> Result<()> {
     let username = &whoami::username();
     let keyring = utilities::new_keyring(username);
     if keyring.get_password().is_err() {
-        anyhow!("Failed to access password in keyring");
+        return Err(anyhow!("Failed to access password in keyring"));
     }
     println!("Keyring integration seems fine");
     Ok(())
@@ -225,7 +223,7 @@ pub fn keyring_forget() -> Result<()> {
     let username = &whoami::username();
     let keyring = utilities::new_keyring(username);
     if keyring.delete_password().is_err() {
-        anyhow!("Failed to delete password from keyring");
+        return Err(anyhow!("Failed to delete password from keyring"));
     }
     Ok(())
 }
