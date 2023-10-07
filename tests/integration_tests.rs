@@ -96,7 +96,7 @@ fn new_show_list() {
         .arg(entry)
         .write_stdin(format!("{}\n{}", passphrase, password))
         .assert()
-        .stdout(format!("Enter passphrase: Password for {}: ", entry))
+        .stdout(format!("Enter passphrase: Password for '{}': ", entry))
         .success();
 
     page()
@@ -117,6 +117,58 @@ fn new_show_list() {
         .write_stdin(format!("{}\n", passphrase))
         .assert()
         .stdout(format!("Enter passphrase: {}\n", password))
+        .success();
+}
+
+#[test]
+fn new_overwrite() {
+    let dir = tempdir();
+    let passphrase = "master";
+    let entry = "entry";
+    let password = "password";
+    let new_password = "new_password";
+
+    page()
+        .env("PAGE_STORAGE_FOLDER", dir.path())
+        .arg("--no-keyring")
+        .arg("init")
+        .write_stdin(format!("{}\n", passphrase))
+        .assert()
+        .stdout(predicate::str::contains("Enter passphrase:"))
+        .success();
+
+    page()
+        .env("PAGE_STORAGE_FOLDER", dir.path())
+        .arg("--no-keyring")
+        .arg("new")
+        .arg(entry)
+        .write_stdin(format!("{}\n{}", passphrase, password))
+        .assert()
+        .stdout(format!("Enter passphrase: Password for '{}': ", entry))
+        .success();
+
+    page()
+        .env("PAGE_STORAGE_FOLDER", dir.path())
+        .arg("--no-keyring")
+        .arg("new")
+        .arg(entry)
+        .write_stdin(format!("{}\ny\n{}", passphrase, new_password))
+        .assert()
+        .stdout(format!(
+            "Enter passphrase: Entry '{}' already exists. Overwrite (y/N)?Password for '{}': ",
+            entry, entry
+        ))
+        .success();
+
+    page()
+        .env("PAGE_STORAGE_FOLDER", dir.path())
+        .arg("--no-keyring")
+        .arg("show")
+        .arg("--on-screen")
+        .arg(entry)
+        .write_stdin(format!("{}\n", passphrase))
+        .assert()
+        .stdout(format!("Enter passphrase: {}\n", new_password))
         .success();
 }
 
@@ -149,7 +201,7 @@ fn new_show_attributes() {
         .arg(url)
         .write_stdin(format!("{}\n{}", passphrase, password))
         .assert()
-        .stdout(format!("Enter passphrase: Password for {}: ", entry))
+        .stdout(format!("Enter passphrase: Password for '{}': ", entry))
         .success();
 
     page()
@@ -203,7 +255,7 @@ fn edit_entry() {
         .arg(entry)
         .write_stdin(format!("{}\n{}", passphrase, password))
         .assert()
-        .stdout(format!("Enter passphrase: Password for {}: ", entry))
+        .stdout(format!("Enter passphrase: Password for '{}': ", entry))
         .success();
 
     page()
@@ -224,7 +276,7 @@ fn edit_entry() {
         .arg(entry)
         .write_stdin(format!("{}\n{}\n", passphrase, new_password))
         .assert()
-        .stdout(format!("Enter passphrase: New password for {}: ", entry))
+        .stdout(format!("Enter passphrase: New password for '{}': ", entry))
         .success();
 
     page()
@@ -233,6 +285,146 @@ fn edit_entry() {
         .arg("show")
         .arg("--on-screen")
         .arg(entry)
+        .write_stdin(format!("{}\n", passphrase))
+        .assert()
+        .stdout(format!("Enter passphrase: {}\n", new_password))
+        .success();
+}
+
+#[test]
+fn edit_entry_name() {
+    let dir = tempdir();
+    let passphrase = "secret";
+    let entry = "editable";
+    let new_entry = "editable2";
+    let password = "password";
+    let new_password = "password2";
+
+    page()
+        .env("PAGE_STORAGE_FOLDER", dir.path())
+        .arg("--no-keyring")
+        .arg("init")
+        .write_stdin(format!("{}\n", passphrase))
+        .assert()
+        .stdout(predicate::str::contains("Enter passphrase:"))
+        .success();
+
+    page()
+        .env("PAGE_STORAGE_FOLDER", dir.path())
+        .arg("--no-keyring")
+        .arg("new")
+        .arg(entry)
+        .write_stdin(format!("{}\n{}", passphrase, password))
+        .assert()
+        .stdout(format!("Enter passphrase: Password for '{}': ", entry))
+        .success();
+
+    page()
+        .env("PAGE_STORAGE_FOLDER", dir.path())
+        .arg("--no-keyring")
+        .arg("show")
+        .arg("--on-screen")
+        .arg(entry)
+        .write_stdin(format!("{}\n", passphrase))
+        .assert()
+        .stdout(format!("Enter passphrase: {}\n", password))
+        .success();
+
+    page()
+        .env("PAGE_STORAGE_FOLDER", dir.path())
+        .arg("--no-keyring")
+        .arg("edit")
+        .arg(entry)
+        .arg("-n")
+        .arg(new_entry)
+        .write_stdin(format!("{}\n{}\n", passphrase, new_password))
+        .assert()
+        .stdout(format!(
+            "Enter passphrase: New password for '{}': ",
+            new_entry
+        ))
+        .success();
+
+    page()
+        .env("PAGE_STORAGE_FOLDER", dir.path())
+        .arg("--no-keyring")
+        .arg("show")
+        .arg("--on-screen")
+        .arg(new_entry)
+        .write_stdin(format!("{}\n", passphrase))
+        .assert()
+        .stdout(format!("Enter passphrase: {}\n", new_password))
+        .success();
+}
+
+#[test]
+fn edit_entry_overwrite() {
+    let dir = tempdir();
+    let passphrase = "secret";
+    let entry = "editable";
+    let entry2 = "editable2";
+    let password = "password";
+    let new_password = "password2";
+
+    page()
+        .env("PAGE_STORAGE_FOLDER", dir.path())
+        .arg("--no-keyring")
+        .arg("init")
+        .write_stdin(format!("{}\n", passphrase))
+        .assert()
+        .stdout(predicate::str::contains("Enter passphrase:"))
+        .success();
+
+    page()
+        .env("PAGE_STORAGE_FOLDER", dir.path())
+        .arg("--no-keyring")
+        .arg("new")
+        .arg(entry)
+        .write_stdin(format!("{}\n{}", passphrase, password))
+        .assert()
+        .stdout(format!("Enter passphrase: Password for '{}': ", entry))
+        .success();
+
+    page()
+        .env("PAGE_STORAGE_FOLDER", dir.path())
+        .arg("--no-keyring")
+        .arg("new")
+        .arg(entry2)
+        .write_stdin(format!("{}\n{}", passphrase, password))
+        .assert()
+        .stdout(format!("Enter passphrase: Password for '{}': ", entry2))
+        .success();
+
+    page()
+        .env("PAGE_STORAGE_FOLDER", dir.path())
+        .arg("--no-keyring")
+        .arg("edit")
+        .arg(entry)
+        .arg("-n")
+        .arg(entry2)
+        .write_stdin(format!("{}\nY\n{}", passphrase, new_password))
+        .assert()
+        .stdout(format!(
+            "Enter passphrase: Entry '{}' already exists. Overwrite (y/N)?New password for '{}': ",
+            entry2, entry2
+        ))
+        .success();
+
+    page()
+        .env("PAGE_STORAGE_FOLDER", dir.path())
+        .arg("--no-keyring")
+        .arg("list")
+        .write_stdin(format!("{}\n", passphrase))
+        .assert()
+        .stdout(format!("Enter passphrase: {}\n", entry2))
+        .success();
+
+    page()
+        .env("PAGE_STORAGE_FOLDER", dir.path())
+        .arg("--no-keyring")
+        .arg("show")
+        .arg("--on-screen")
+        .arg(entry2)
         .write_stdin(format!("{}\n", passphrase))
         .assert()
         .stdout(format!("Enter passphrase: {}\n", new_password))
@@ -262,7 +454,7 @@ fn remove_entry() {
         .arg(entry)
         .write_stdin(format!("{}\n{}", passphrase, password))
         .assert()
-        .stdout(format!("Enter passphrase: Password for {}: ", entry))
+        .stdout(format!("Enter passphrase: Password for '{}': ", entry))
         .success();
 
     page()
