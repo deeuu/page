@@ -35,14 +35,17 @@ pub fn new_entry(
     let mut storage = load_entries(&passphrase)?;
 
     if storage.entries.contains_key(&entry) {
-        let overwrite = utilities::read_stdin("Entry already exists. Overwrite (y/N)?")?;
+        let overwrite = utilities::read_stdin(&format!(
+            "Entry '{}' already exists. Overwrite (y/N)?",
+            entry
+        ))?;
         if overwrite.to_uppercase() != "Y" {
             return Ok(());
         }
     }
 
     let password = Secret::new(rpassword::prompt_password_stdout(&format!(
-        "Password for {}: ",
+        "Password for '{}': ",
         entry
     ))?);
 
@@ -128,7 +131,22 @@ pub fn edit(
         .ok_or_else(|| anyhow!("entry '{}' not found", entry_name))?;
 
     let name = match new_name {
-        Some(u) => u,
+        Some(nm) => {
+            // check if we are replacing an existing entry
+            if (nm != entry_name) && (storage.entries.contains_key(&nm)) {
+                let overwrite = utilities::read_stdin(&format!(
+                    "Entry '{}' already exists. Overwrite (y/N)?",
+                    nm
+                ))?;
+
+                if overwrite.to_uppercase() == "Y" {
+                    let _ = storage.entries.remove(&nm);
+                } else {
+                    return Ok(());
+                }
+            }
+            nm
+        }
         None => entry_name,
     };
 
@@ -144,7 +162,7 @@ pub fn edit(
 
     let password = match no_prompt {
         true => entry.password,
-        false => rpassword::prompt_password_stdout(&format!("New password for {}: ", name))?,
+        false => rpassword::prompt_password_stdout(&format!("New password for '{}': ", name))?,
     };
 
     storage.entries.insert(
