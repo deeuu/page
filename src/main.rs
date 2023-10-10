@@ -1,6 +1,7 @@
 mod cli;
 mod entries;
 mod hooks;
+mod keepass;
 mod paths;
 mod utilities;
 use anyhow::Result;
