@@ -1,11 +1,13 @@
 use crate::cli::EntryAttribute;
 use crate::entries::{load_entries, save_entries, Entry, Storage};
 use crate::hooks::{run_hook, Hook, HookEvent};
+use crate::keepass;
 use crate::paths::{entries_file, hooks_dir, storage_dir};
 use crate::utilities;
+use age::secrecy::{ExposeSecret, Secret};
 use anyhow::{anyhow, Error, Result};
-use secrecy::{ExposeSecret, Secret};
 use std::fs;
+use std::path::PathBuf;
 
 pub fn init(no_keyring: bool) -> Result<(), Error> {
     fs::create_dir_all(storage_dir()?)?;
@@ -225,5 +227,26 @@ pub fn keyring_forget() -> Result<()> {
     if keyring.delete_password().is_err() {
         return Err(anyhow!("Failed to delete password from keyring"));
     }
+    Ok(())
+}
+
+pub fn import_keepass(
+    database: &PathBuf,
+    keyfile: Option<&PathBuf>,
+    password: bool,
+    prefix: Option<&str>,
+    no_keyring: bool,
+) -> Result<()> {
+    let credentials = keepass::new_credentials(keyfile, password)?;
+
+    let passphrase = utilities::get_passphrase(no_keyring)?;
+    let mut storage = load_entries(&passphrase)?;
+
+    let keepass_storage = Storage::from_keepass(database, credentials, prefix)?;
+
+    storage.add_entries(keepass_storage);
+
+    save_entries(passphrase, &storage)?;
+
     Ok(())
 }

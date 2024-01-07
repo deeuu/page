@@ -1,8 +1,8 @@
+use age::secrecy::Secret;
 use anyhow::{anyhow, Error, Result};
 use clipboard::ClipboardContext;
 use clipboard::ClipboardProvider;
 use keyring::Keyring;
-use secrecy::Secret;
 use std::io;
 use std::io::{Read, Write};
 

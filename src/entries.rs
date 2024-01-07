@@ -1,7 +1,7 @@
 use crate::paths::entries_file;
 use crate::utilities::{decrypt, encrypt};
+use age::secrecy::Secret;
 use anyhow::{anyhow, Context, Result};
-use secrecy::Secret;
 use serde::{Deserialize, Serialize};
 use std::{
     collections::HashMap,
@@ -21,6 +21,12 @@ pub struct Entry {
     pub password: String,
     pub username: Option<String>,
     pub url: Option<String>,
+}
+
+impl Storage {
+    pub fn add_entries(&mut self, storage: Storage) {
+        self.entries.extend(storage.entries);
+    }
 }
 
 pub fn load_entries(passphrase: &Secret<String>) -> Result<Storage> {

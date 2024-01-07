@@ -1,4 +1,5 @@
 use clap::{Parser, Subcommand, ValueEnum};
+use std::path::PathBuf;
 
 #[derive(Parser)]
 #[command(version, about)]
@@ -65,6 +66,11 @@ pub enum Cmd {
         #[command(subcommand)]
         cmd: KeyringCmd,
     },
+    /// Import entries from another password store
+    Import {
+        #[command(subcommand)]
+        cmd: ImportCmd,
+    },
 }
 
 #[derive(ValueEnum, Clone)]
@@ -80,4 +86,17 @@ pub enum KeyringCmd {
     Check,
     /// Deletes the password from the keyring
     Forget,
+}
+
+#[derive(Subcommand)]
+pub enum ImportCmd {
+    /// Import from keepass
+    Keepass {
+        database: PathBuf,
+        keyfile: Option<PathBuf>,
+        #[arg(long = "pw")]
+        password: bool,
+        #[arg(long, short)]
+        prefix: Option<String>,
+    },
 }

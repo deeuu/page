@@ -5,45 +5,32 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::path::PathBuf;
 
-enum KeepassCredentials<'a> {
-    Key(PathBuf),
-    Password(&'a str),
-    KeyPassword(PathBuf, &'a str),
+pub fn new_credentials(keyfile: Option<&PathBuf>, password: bool) -> Result<DatabaseKey> {
+    let mut key = DatabaseKey::new();
+
+    if password {
+        let pw = rpassword::prompt_password_stdout("Enter keepass password: ")?;
+        key = key.with_password(&pw);
+    }
+
+    if let Some(path) = keyfile {
+        let keyfile = &mut File::open(path)?;
+        key = key.with_keyfile(keyfile)?;
+    }
+
+    Ok(key)
 }
 
 impl Storage {
-    fn from_keepass(
-        path: &PathBuf,
-        credentials: KeepassCredentials,
-        prefix: Option<&String>,
-    ) -> Result<Storage> {
-        let db = match credentials {
-            KeepassCredentials::Key(keypath) => {
-                let keyfile = &mut File::open(keypath)?;
-                Database::open(&mut File::open(path)?, DatabaseKey::with_keyfile(keyfile))?
-            }
-            KeepassCredentials::Password(password) => {
-                Database::open(&mut File::open(path)?, DatabaseKey::with_password(password))?
-            }
-            KeepassCredentials::KeyPassword(keypath, password) => {
-                let keyfile = &mut File::open(keypath)?;
-                Database::open(
-                    &mut File::open(path)?,
-                    DatabaseKey::with_password_and_keyfile(password, keyfile),
-                )?
-            }
-        };
+    pub fn from_keepass(path: &PathBuf, key: DatabaseKey, prefix: Option<&str>) -> Result<Storage> {
+        let db = Database::open(&mut File::open(path)?, key)?;
         let mut entries = HashMap::new();
         keepass_entries(&mut entries, &db.root, prefix);
         Ok(Storage { entries })
     }
 }
 
-fn keepass_entries(
-    entries: &mut HashMap<String, Entry>,
-    group: &Group,
-    group_path: Option<&String>,
-) {
+fn keepass_entries(entries: &mut HashMap<String, Entry>, group: &Group, group_path: Option<&str>) {
     for node in &group.children {
         match node {
             Node::Group(g) => {

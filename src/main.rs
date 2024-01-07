@@ -7,7 +7,7 @@ mod utilities;
 use anyhow::Result;
 pub use clap::Parser;
 mod commands;
-use cli::{Cli, Cmd, KeyringCmd};
+use cli::{Cli, Cmd, ImportCmd, KeyringCmd};
 
 fn main() -> Result<()> {
     let opt = Cli::parse();
@@ -44,6 +44,20 @@ fn main() -> Result<()> {
         Cmd::Keyring { cmd } => match cmd {
             KeyringCmd::Check => commands::keyring_check(),
             KeyringCmd::Forget => commands::keyring_forget(),
+        },
+        Cmd::Import { cmd } => match cmd {
+            ImportCmd::Keepass {
+                database,
+                keyfile,
+                password,
+                prefix,
+            } => commands::import_keepass(
+                &database,
+                keyfile.as_ref(),
+                password,
+                prefix.as_deref(),
+                opt.no_keyring,
+            ),
         },
     }
 }
