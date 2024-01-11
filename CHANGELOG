@@ -6,9 +6,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
+
+## [1.0.1] 2020-04-05
+### Changed
+- Fixed typo in README.md
+
+## [1.0.0] 2021-04-05
+### Changed
+- Ran cargo update to fix security warnings (https://github.com/stchris/passage/commit/6eefae4028778903ead6258f18bd773cced53b61)
+- Added maintenance warning to README.md
+
+## [1.0.0.rc-2] 2020-12-19
 ### Changed
 - Changed to `tempfile` crate instead of `tempdir` (#57)
-- Ran cargo update to fix security warnings (https://github.com/stchris/passage/commit/6eefae4028778903ead6258f18bd773cced53b61)
 
 ## [1.0.0.rc-1] 2020-11-30
 ### Added
