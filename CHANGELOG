@@ -6,6 +6,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
+### Changed
+- Replaced structopt with clap==4.2.2
+- Renamed application from `passage` to `page`
+- Exit on CLI parsing error
+- Renamed environment variable `PASSAGE_STORAGE_FOLDER` to `PAGE_STORAGE_FOLDER`
+- Minor alterations to prompts
+- Cargo update 2024-01-12
+
+### Added
+- Added entry attributes `username` and `url`.
+- New attributes supported by `new`, `show` and `edit` commands
+- Added `--new-name` option to `edit` command to allow for specifying new entry name without prompt
+- Added `--no-prompt` flag to when editing password to disable prompt for new password.
+- Integration tests for overwring and entry, showing entry attributes and editing an entry
 
 ## [1.0.1] 2020-04-05
 ### Changed
