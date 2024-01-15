@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Renamed environment variable `PASSAGE_STORAGE_FOLDER` to `PAGE_STORAGE_FOLDER`
 - Minor alterations to prompts
 - Cargo update 2024-01-12
+- Updated README.md to reflect fork
 
 ### Added
 - Added entry attributes `username` and `url`.
@@ -20,6 +21,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `--new-name` option to `edit` command to allow for specifying new entry name without prompt
 - Added `--no-prompt` flag to when editing password to disable prompt for new password.
 - Integration tests for overwring and entry, showing entry attributes and editing an entry
+
+### Fixed
+- Fixed hooks for edit and remove commands
 
 ## [1.0.1] 2020-04-05
 ### Changed
