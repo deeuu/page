@@ -119,7 +119,7 @@ pub fn edit(
     no_prompt: bool,
     no_keyring: bool,
 ) -> Result<()> {
-    run_hook(&Hook::PreLoad, &HookEvent::ShowEntry)?;
+    run_hook(&Hook::PreLoad, &HookEvent::EditEntry)?;
     let passphrase = utilities::get_passphrase(no_keyring)?;
     let mut storage = load_entries(&passphrase)?;
 
@@ -179,7 +179,7 @@ pub fn edit(
 }
 
 pub fn remove(entry: &str, no_keyring: bool) -> Result<()> {
-    run_hook(&Hook::PreLoad, &HookEvent::ShowEntry)?;
+    run_hook(&Hook::PreLoad, &HookEvent::RemoveEntry)?;
     let passphrase = utilities::get_passphrase(no_keyring)?;
     let mut storage = load_entries(&passphrase)?;
     if storage.entries.remove(entry).is_some() {
