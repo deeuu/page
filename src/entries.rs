@@ -1,7 +1,7 @@
 use crate::paths::entries_file;
 use crate::utilities::{decrypt, encrypt};
+use age::secrecy::Secret;
 use anyhow::{anyhow, Context, Result};
-use secrecy::Secret;
 use serde::{Deserialize, Serialize};
 use std::{
     collections::HashMap,

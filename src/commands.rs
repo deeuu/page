@@ -3,8 +3,8 @@ use crate::entries::{load_entries, save_entries, Entry, Storage};
 use crate::hooks::{run_hook, Hook, HookEvent};
 use crate::paths::{entries_file, hooks_dir, storage_dir};
 use crate::utilities;
+use age::secrecy::{ExposeSecret, Secret};
 use anyhow::{anyhow, Error, Result};
-use secrecy::{ExposeSecret, Secret};
 use std::fs;
 
 pub fn init(no_keyring: bool) -> Result<(), Error> {
