@@ -1,7 +1,6 @@
 use age::secrecy::Secret;
 use anyhow::{anyhow, Error, Result};
-use clipboard::ClipboardContext;
-use clipboard::ClipboardProvider;
+use arboard::Clipboard;
 use keyring::Keyring;
 use std::io;
 use std::io::{Read, Write};
@@ -83,39 +82,8 @@ pub fn reveal(attribute: &String, on_screen: bool) -> Result<()> {
     if on_screen {
         println!("{}", attribute);
     } else {
-        copy_to_clipboard(attribute.to_string())?;
+        let mut clipboard = Clipboard::new()?;
+        clipboard.set_text(attribute.to_string())?;
     }
-    Ok(())
-}
-
-#[cfg(target_os = "linux")]
-use fork::{fork, Fork};
-
-#[cfg(target_os = "linux")]
-fn copy_to_clipboard(decrypted: String) -> Result<(), Error> {
-    match fork() {
-        Ok(Fork::Child) => {
-            let mut ctx: ClipboardContext = ClipboardProvider::new()
-                .map_err(|e| anyhow!("failed to initialize clipboard provider: {}", e))?;
-            ctx.set_contents(decrypted)
-                .map_err(|e| anyhow!("failed to copy to clipboard: {}", e))?;
-
-            std::thread::sleep(std::time::Duration::from_secs(10));
-
-            ctx.set_contents("".to_owned())
-                .map_err(|e| anyhow!("failed to copy to clipboard: {}", e))?;
-        }
-        Err(_) => return Err(Error::msg("Failed to fork()")),
-        Ok(_) => {}
-    }
-    Ok(())
-}
-
-#[cfg(not(target_os = "linux"))]
-pub fn copy_to_clipboard(decrypted: String) -> Result<(), Error> {
-    let mut ctx: ClipboardContext = ClipboardProvider::new()
-        .map_err(|e| anyhow!("failed to initialize clipboard provider: {}", e))?;
-    ctx.set_contents(decrypted)
-        .map_err(|e| anyhow!("failed to copy to clipboard: {}", e))?;
     Ok(())
 }
