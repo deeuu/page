@@ -15,27 +15,28 @@ jobs:
       - name: Get version from tag
         id: tag_name
         run: |
-          echo ::set-output name=current_version::${GITHUB_REF#refs/tags/v}
+          echo "current_version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
         shell: bash
       - name: Checkout code
         uses: actions/checkout@v2
       - name: Get Changelog Entry
         id: changelog_reader
-        uses: mindsers/changelog-reader-action@v1
+        uses: mindsers/changelog-reader-action@v2
         with:
+          validation_level: warn
           version: ${{ steps.tag_name.outputs.current_version }}
           path: ./CHANGELOG
       - name: Create Release
         id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: ncipollo/release-action@v1
         with:
-          tag_name: ${{ github.ref }}
-          release_name: ${{ github.ref }}
-          body: ${{ steps.changelog_reader.outputs.log_entry }}
-          draft: false
-          prerelease: false
+          tag: ${{ steps.changelog_reader.outputs.version }}
+          name: Release ${{ steps.changelog_reader.outputs.version }}
+          body: ${{ steps.changelog_reader.outputs.changes }}
+          prerelease: ${{ steps.changelog_reader.outputs.status == 'prereleased' }}
+          draft: ${{ steps.changelog_reader.outputs.status == 'unreleased' }}
+          allowUpdates: true
+          token: ${{ secrets.GITHUB_TOKEN }}
 
   build:
     name: Publish for ${{ matrix.name }}
@@ -46,90 +47,44 @@ jobs:
         include:
           - name: linux
             os: ubuntu-latest
-            deps: sudo apt-get install -y libxcb-render0-dev libxcb-shape0-dev libxcb-xfixes0-dev libdbus-1-dev
-            archive_name: passage.tar.gz
+            archive_name: page.tar.gz
             asset_suffix: x86_64-linux.tar.gz
 
           - name: macos
             os: macos-latest
-            archive_name: passage.tar.gz
+            archive_name: page.tar.gz
             asset_suffix: x86_64-darwin.tar.gz
 
     steps:
-      - uses: actions/checkout@v1
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
-
-      - name: Install linux build dependencies
-        run: ${{ matrix.deps }}
-        if: matrix.deps != ''
-
-      - name: cargo build
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --all --release --locked ${{ matrix.build_flags }}
-
-      - name: Create archive
-        run: |
-          mkdir -p release/passage
-          mv target/${{ matrix.target }}/release/passage* release/passage/
-          rm release/passage/*.d
-          tar czf ${{ matrix.archive_name }} -C release/ passage/
-
-      - name: Get the version
-        id: get_version
-        run: echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/}
-        shell: bash
-
-      - name: Upload archive to release
-        uses: svenstaro/upload-release-action@v1-release
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ${{ matrix.archive_name }}
-          asset_name: passage-${{ steps.get_version.outputs.VERSION }}-${{ matrix.asset_suffix }}
-          tag: ${{ github.ref }}
-
-  deb:
-    name: Debian ${{ matrix.name }}
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        name: [linux]
-        include:
-          - name: linux
-            target: x86_64-unknown-linux-gnu
-            deps: sudo apt-get install -y libxcb-render0-dev libxcb-shape0-dev libxcb-xfixes0-dev libdbus-1-dev
-
-    steps:
-      - uses: actions/checkout@v1
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
-      - name: Add target
-        run: rustup target add ${{ matrix.target }}
-      - name: cargo install cargo-deb
-        uses: actions-rs/cargo@v1
-        with:
-          command: install
-          args: cargo-deb
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Install build dependencies
         run: ${{ matrix.deps }}
         if: matrix.deps != ''
 
-      - name: cargo deb
-        uses: actions-rs/cargo@v1
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
         with:
-          command: deb
+          targets: ${{ matrix.target }}
 
-      - name: Upload Debian package to release
-        uses: svenstaro/upload-release-action@v1-release
+      - name: Cache dependencies
+        uses: Swatinem/rust-cache@v2
+
+      - name: Build
+        run: cargo build --release --locked --verbose --target ${{ matrix.target }}
+
+      - name: Create archive
+        run: |
+          mkdir -p release/page
+          mv target/${{ matrix.target }}/release/page* release/page/
+          rm release/page/*.d
+          tar czf ${{ matrix.archive_name }} -C release/ page/
+
+      - name: Upload archive to release
+        uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: target/debian/*.deb
+          file: ${{ matrix.archive_name }}
+          asset_name: page-${{ steps.get_version.outputs.VERSION }}-${{ matrix.asset_suffix }}
           tag: ${{ github.ref }}
-          file_glob: true
