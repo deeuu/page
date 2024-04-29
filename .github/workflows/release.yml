@@ -47,13 +47,15 @@ jobs:
         include:
           - name: linux
             os: ubuntu-latest
-            archive_name: page.tar.gz
-            asset_suffix: x86_64-linux.tar.gz
+            archive_name: ${{ github.event.repository.name }}
+            asset_name: ${{ github.event.repository.name }}-macos-amd64-linux-amd64
+            target: x86_64-unknown-linux-musl
 
           - name: macos
             os: macos-latest
-            archive_name: page.tar.gz
-            asset_suffix: x86_64-darwin.tar.gz
+            archive_name: ${{ github.event.repository.name }}
+            asset_name: ${{ github.event.repository.name }}-macos-amd64
+            taget: aarch64-apple-darwin
 
     steps:
       - name: Checkout
@@ -74,17 +76,10 @@ jobs:
       - name: Build
         run: cargo build --release --locked --verbose --target ${{ matrix.target }}
 
-      - name: Create archive
-        run: |
-          mkdir -p release/page
-          mv target/${{ matrix.target }}/release/page* release/page/
-          rm release/page/*.d
-          tar czf ${{ matrix.archive_name }} -C release/ page/
-
       - name: Upload archive to release
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ${{ matrix.archive_name }}
-          asset_name: page-${{ steps.get_version.outputs.VERSION }}-${{ matrix.asset_suffix }}
+          file: target/release/${{ matrix.artifact_name }}
+          asset_name: ${{ matrix.asset_name }}-${{ steps.get_version.outputs.VERSION }}
           tag: ${{ github.ref }}
