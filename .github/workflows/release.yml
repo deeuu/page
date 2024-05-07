@@ -48,14 +48,24 @@ jobs:
           - name: linux
             os: ubuntu-latest
             archive_name: ${{ github.event.repository.name }}
-            asset_name: ${{ github.event.repository.name }}-macos-amd64-linux-amd64
+            asset_name: ${{ github.event.repository.name }}-linux-x64
+            exe_suffix: ""
             target: x86_64-unknown-linux-musl
 
           - name: macos
             os: macos-latest
             archive_name: ${{ github.event.repository.name }}
             asset_name: ${{ github.event.repository.name }}-macos-amd64
-            taget: aarch64-apple-darwin
+            exe_suffix: ""
+            target: aarch64-apple-darwin
+
+          - name: windows
+            os: windows-latest
+            archive_name: ${{ github.event.repository.name }}
+            asset_name: ${{ github.event.repository.name }}-windows-x64
+            exe_suffix: ".exe"
+            target: x86_64-pc-windows-msvc
+
 
     steps:
       - name: Checkout
@@ -80,6 +90,6 @@ jobs:
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: target/release/${{ matrix.artifact_name }}
-          asset_name: ${{ matrix.asset_name }}-${{ steps.get_version.outputs.VERSION }}
+          file: target/${{ matrix.target }}/release/page${{ matrix.exe_suffix }}
+          asset_name: ${{ matrix.asset_name }}
           tag: ${{ github.ref }}
