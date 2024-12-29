@@ -160,7 +160,7 @@ pub fn edit(
 
     let password = match no_prompt {
         true => entry.password,
-        false => rpassword::prompt_password_stdout(&format!("New password for '{}': ", name))?,
+        false => rpassword::prompt_password_stdout(&format!("Password for '{}': ", name))?,
     };
 
     storage.entries.insert(
