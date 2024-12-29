@@ -1,6 +1,7 @@
 use assert_cmd::Command;
 use predicates::prelude::*;
 use predicates::str::RegexPredicate;
+use std::path::Path;
 
 fn page() -> Command {
     Command::cargo_bin("page").unwrap()
@@ -71,6 +72,11 @@ fn info() {
 fn switch_storage_folder() {
     let dir = tempdir();
 
+    let entries_file_path = Path::new(dir.path())
+        .join("entries.toml.age")
+        .display()
+        .to_string();
+
     page()
         .env("PAGE_STORAGE_FOLDER", dir.path())
         .arg("--no-keyring")
@@ -85,8 +91,7 @@ fn switch_storage_folder() {
         .assert()
         .success()
         .stdout(predicate::str::starts_with(format!(
-            "Storage file: {}/entries.toml.age\n",
-            dir.path().to_str().unwrap()
+            "Storage file: {entries_file_path}"
         )));
 }
 
