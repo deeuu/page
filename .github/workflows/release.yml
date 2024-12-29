@@ -43,7 +43,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        name: [linux, macos]
+        name: [linux, macos, windows]
         include:
           - name: linux
             os: ubuntu-latest
