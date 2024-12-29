@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `test` GH workflow now uses `dtolnay/rust-toolchain` and `Swatinem/rust-cache` actions
 - `audit` GH workflow now uses [cargo deny](https://github.com/EmbarkStudios/cargo-deny-action) for code auditing, replacing [audit check](https://github.com/actions-rs/audit-check)
 - `release` GH workflow stale actions replaced by maintained alternatives
+- Fixed integration tests to account for newline added rpassword: tests now succeed on Windows
 
 ### Added
 - Added entry attributes `username` and `url`.

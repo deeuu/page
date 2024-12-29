@@ -2,7 +2,7 @@
 
 Password manager with [age encryption](https://age-encryption.org/).
 
-This is a fork of [passage](https://github.com/stchris/passage) by [strchris](https://github.com/stchris) since it is no longer maintained and I enjoyed using it. It was also a good excuse for me to start digging into rust. Note that I've renamed the tool `page`, given that the author of [age](https://age-encryption.org/) has released a popular altnerative to the [password-store](https://www.passwordstore.org/), which is also called [passage](https://github.com/FiloSottile/passage).
+This is a fork of [passage](https://github.com/stchris/passage) by [strchris](https://github.com/stchris) since it is no longer maintained and I enjoyed using it. It was also a good excuse for me to start digging into rust. Note that I've renamed the tool `page`, given that the author of [age](https://age-encryption.org/) has released a popular alternative to the [password-store](https://www.passwordstore.org/), which is also called [passage](https://github.com/FiloSottile/passage).
 
 Note that `page` is compatible with the password database file created by the original `passage`, so you can safely migrate to this tool.
 
@@ -31,6 +31,7 @@ $ cargo install --path .
 
     Linux: `/home/user/.local/share/page/entries.toml.age`
     mac OS: `/Users/user/Library/Application Support/page/entries.toml.age`
+    Windows: `C:\Users\user\AppData\Roaming\page\data\entries.toml.age`
 
 You can create this file by running `page init` once. Check the path to the storage folder at any time with `page info`:
 
@@ -39,17 +40,17 @@ $ page info
 Storage file: /home/deeuu/.local/share/page/entries.toml.age
 ```
 
-Now let's create a new entry with `$ page new <entry>`:
+Now let's create a new entry called `email`, with `$ page new email`:
 
 ```bash
 Enter passphrase:
-Password for '<entry>':
+Password for 'email':
 ```
 
 So here we are prompted for two things:
 
-1. `Enter passphrase` is the secret we want to encrypt the password with (this is used to enrypt the entries file, so applies to all password).
-2. `Password for '<entry>'` is the password we want to store.
+1. `Enter passphrase` is the secret we want to encrypt the password database with (this is used to enrypt the entries file, so applies to all passwords).
+2. `Password for 'email'` is the password for the entry named `email` that we want to store.
 
 Now `page list` should show one entry (`email`), which we can decrypt with either:
 
@@ -72,14 +73,14 @@ $ page show <entry> --attribute username         # copy the username to the clip
 
 ## Hooks
 
-`page` is able to call into [git-style hooks](https://git-scm.com/book/uz/v2/Customizing-Git-Git-Hooks) before or after certain events which affect the password database. A typical use case for hooks is if your password file is stored in version control and you want to automatically push / pull the changes when interacting with `page`.
+`page` is able to call into [git-style hooks](https://git-scm.com/book/uz/v2/Customizing-Git-Git-Hooks) before or after certain events which affect the password database. A typical use case for hooks is if your password file is stored in version control and you want to automatically push/pull the changes when interacting with `page`.
 
-To use hooks you need the respective folder: its path can be seen by running `page info`. By convention you put executable scripts inside this folder, named after the hook you want to react on. These scripts are called and passed the event which triggered the hook as the first argument.
+To use hooks, place executable scripts, named after the hook you want to react on, inside the hooks folder (its path can be seen by running `page info`). These scripts are called and passed the event which triggered the hook as the first argument.
 
 Existing hooks:
 
 * `pre_load` (called before the password database gets loaded)
-* `post_save` (called after an update to the password database)
+* `post_save` (called after the password database is updated)
 
 These commands trigger hooks:
 
@@ -101,6 +102,7 @@ To skip the keyring integration, `page` takes a global flag `--no-keyring`.
 
 ```bash
 $ page
+
 A password manager with age encryption
 
 Usage: page [OPTIONS] <COMMAND>
@@ -114,7 +116,6 @@ Commands:
   remove   Remove an entry
   info     Display status information
   keyring  Keyring related commands
-  import   Import entries from another password store
   help     Print this message or the help of the given subcommand(s)
 
 Options:
