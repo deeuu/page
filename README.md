@@ -10,7 +10,7 @@ Note that `page` is compatible with the password database file created by the or
 
 ### Binaries and packages (preferred)
 
-The [release page](https://github.com/deeuu/page) includes binaries for Linux and mac OS as well as `deb` files for Debian / Ubuntu.
+The [release page](https://github.com/deeuu/page/releases) includes binaries for Linux, mac OS and Windows.
 
 ### Build from source (for development)
 
