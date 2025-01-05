@@ -1,6 +1,6 @@
 use crate::paths::entries_file;
 use crate::utilities::{decrypt, encrypt};
-use age::secrecy::Secret;
+use age::secrecy::SecretString;
 use anyhow::{anyhow, Context, Result};
 use serde::{Deserialize, Serialize};
 use std::{
@@ -23,7 +23,7 @@ pub struct Entry {
     pub url: Option<String>,
 }
 
-pub fn load_entries(passphrase: &Secret<String>) -> Result<Storage> {
+pub fn load_entries(passphrase: SecretString) -> Result<Storage> {
     let mut encrypted: Vec<u8> = vec![];
     let entries_file_path = entries_file()?;
     let file = match fs::metadata(&entries_file_path) {
@@ -45,7 +45,7 @@ pub fn load_entries(passphrase: &Secret<String>) -> Result<Storage> {
     }
 }
 
-pub fn save_entries(passphrase: Secret<String>, storage: &Storage) -> Result<()> {
+pub fn save_entries(passphrase: SecretString, storage: &Storage) -> Result<()> {
     let bytes: Vec<u8> = toml::to_vec(&storage)?;
     let encrypted = encrypt(&bytes, passphrase)?;
     let mut file = File::create(entries_file()?)?;

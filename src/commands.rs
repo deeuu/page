@@ -3,7 +3,7 @@ use crate::entries::{load_entries, save_entries, Entry, Storage};
 use crate::hooks::{run_hook, Hook, HookEvent};
 use crate::paths::{entries_file, hooks_dir, storage_dir};
 use crate::utilities;
-use age::secrecy::{ExposeSecret, Secret};
+use age::secrecy::{ExposeSecret, SecretString};
 use anyhow::{anyhow, Error, Result};
 use std::fs;
 
@@ -30,7 +30,7 @@ pub fn new_entry(
 ) -> Result<(), Error> {
     run_hook(&Hook::PreLoad, &HookEvent::NewEntry)?;
     let passphrase = utilities::get_passphrase(no_keyring)?;
-    let mut storage = load_entries(&passphrase)?;
+    let mut storage = load_entries(passphrase.clone())?;
 
     if storage.entries.contains_key(&entry) {
         let overwrite = utilities::read_stdin(&format!(
@@ -42,7 +42,7 @@ pub fn new_entry(
         }
     }
 
-    let password = Secret::new(rpassword::prompt_password_stdout(&format!(
+    let password = SecretString::from(rpassword::prompt_password_stdout(&format!(
         "Password for '{}': ",
         entry
     ))?);
@@ -66,7 +66,7 @@ pub fn list(no_keyring: bool) -> Result<(), Error> {
     run_hook(&Hook::PreLoad, &HookEvent::ListEntries)?;
 
     let passphrase = utilities::get_passphrase(no_keyring)?;
-    let storage = load_entries(&passphrase)?;
+    let storage = load_entries(passphrase)?;
     for name in storage.entries.keys() {
         println!("{}", name);
     }
@@ -81,7 +81,7 @@ pub fn show(
 ) -> Result<()> {
     run_hook(&Hook::PreLoad, &HookEvent::ShowEntry)?;
     let passphrase = utilities::get_passphrase(no_keyring)?;
-    let storage = load_entries(&passphrase)?;
+    let storage = load_entries(passphrase)?;
 
     if storage.entries.contains_key(entry) {
         let entry = storage
@@ -121,7 +121,7 @@ pub fn edit(
 ) -> Result<()> {
     run_hook(&Hook::PreLoad, &HookEvent::EditEntry)?;
     let passphrase = utilities::get_passphrase(no_keyring)?;
-    let mut storage = load_entries(&passphrase)?;
+    let mut storage = load_entries(passphrase.clone())?;
 
     let entry = storage
         .entries
@@ -181,7 +181,7 @@ pub fn edit(
 pub fn remove(entry: &str, no_keyring: bool) -> Result<()> {
     run_hook(&Hook::PreLoad, &HookEvent::RemoveEntry)?;
     let passphrase = utilities::get_passphrase(no_keyring)?;
-    let mut storage = load_entries(&passphrase)?;
+    let mut storage = load_entries(passphrase.clone())?;
     if storage.entries.remove(entry).is_some() {
         save_entries(passphrase, &storage)?;
         run_hook(&Hook::PostSave, &HookEvent::RemoveEntry)?;
