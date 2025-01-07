@@ -32,7 +32,8 @@ jobs:
         id: create_release
         uses: ncipollo/release-action@v1
         with:
-          tag: ${{ steps.changelog_reader.outputs.version }}
+          tag: ${{ github.ref }}
+          release_name: ${{ github.ref }}
           name: Release ${{ steps.changelog_reader.outputs.version }}
           body: ${{ steps.changelog_reader.outputs.changes }}
           prerelease: ${{ steps.changelog_reader.outputs.status == 'prereleased' }}
