@@ -11,6 +11,8 @@ jobs:
     # using https://github.com/marketplace/actions/changelog-reader
     name: Create Release
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Get version from tag
         id: tag_name
@@ -41,6 +43,8 @@ jobs:
   build:
     name: Publish for ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: write
     strategy:
       matrix:
         name: [linux, macos, windows]
