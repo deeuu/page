@@ -1,5 +1,4 @@
 pre-release-commit-message = "chore({{crate_name}}): Release {{version}}"
-no-dev-version = true
 pre-release-replacements = [
   {file="CHANGELOG", search="Unreleased", replace="{{version}}"},
   {file="CHANGELOG", search="ReleaseDate", replace="{{date}}"},
