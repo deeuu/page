@@ -1,7 +1,7 @@
 use clap::{Parser, Subcommand, ValueEnum};
 
 #[derive(Parser)]
-#[command(bin_name="page", version, about)]
+#[command(bin_name = "page", version, about)]
 pub struct Cli {
     #[command(subcommand)]
     pub cmd: Cmd,
@@ -66,9 +66,7 @@ pub enum Cmd {
         cmd: KeyringCmd,
     },
     /// shell completion
-    Completions {
-        shell: Shell,
-    },
+    Completions { shell: Shell },
 }
 
 #[derive(ValueEnum, Clone)]
@@ -80,7 +78,6 @@ pub enum Shell {
     Powershell,
     Nushell,
 }
-
 
 #[derive(ValueEnum, Clone)]
 pub enum EntryAttribute {

@@ -45,8 +45,9 @@ fn main() -> Result<()> {
             KeyringCmd::Forget => commands::keyring_forget(),
         },
 
-        Cmd::Completions { shell } => { commands::shell_completion(shell); Ok(()) }
-
-
+        Cmd::Completions { shell } => {
+            commands::shell_completion(shell);
+            Ok(())
+        }
     }
 }

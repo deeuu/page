@@ -1,15 +1,15 @@
 use crate::cli::{self, EntryAttribute};
 use crate::entries::{load_entries, save_entries, Entry, Storage};
-use clap::CommandFactory;
-use clap_complete::{Shell, generate};
-use clap_complete_nushell::Nushell;
 use crate::hooks::{run_hook, Hook, HookEvent};
 use crate::paths::{entries_file, hooks_dir, storage_dir};
 use crate::utilities;
 use age::secrecy::{ExposeSecret, SecretString};
-use std::io;
 use anyhow::{anyhow, Error, Result};
+use clap::CommandFactory;
+use clap_complete::{generate, Shell};
+use clap_complete_nushell::Nushell;
 use std::fs;
+use std::io;
 
 pub fn init(no_keyring: bool) -> Result<(), Error> {
     fs::create_dir_all(storage_dir()?)?;
@@ -234,14 +234,18 @@ pub fn keyring_forget() -> Result<()> {
 
 pub fn shell_completion(shell: cli::Shell) {
     let mut cmd = cli::Cli::command();
-    let bin_name = cmd.get_bin_name().unwrap_or_else(|| cmd.get_name()).to_owned();
+    let bin_name = cmd
+        .get_bin_name()
+        .unwrap_or_else(|| cmd.get_name())
+        .to_owned();
     match shell {
-        cli::Shell::Bash => {generate(Shell::Bash, &mut cmd, bin_name, &mut io::stdout())},
-        cli::Shell::Fish => {generate(Shell::Fish, &mut cmd, bin_name, &mut io::stdout())},
-        cli::Shell::Zsh => {generate(Shell::Zsh, &mut cmd, bin_name, &mut io::stdout())},
-        cli::Shell::Elvish => {generate(Shell::Elvish, &mut cmd, bin_name, &mut io::stdout())},
-        cli::Shell::Powershell => {generate(Shell::PowerShell, &mut cmd, bin_name, &mut io::stdout())},
-        cli::Shell::Nushell => {generate(Nushell, &mut cmd, bin_name, &mut io::stdout())},
+        cli::Shell::Bash => generate(Shell::Bash, &mut cmd, bin_name, &mut io::stdout()),
+        cli::Shell::Fish => generate(Shell::Fish, &mut cmd, bin_name, &mut io::stdout()),
+        cli::Shell::Zsh => generate(Shell::Zsh, &mut cmd, bin_name, &mut io::stdout()),
+        cli::Shell::Elvish => generate(Shell::Elvish, &mut cmd, bin_name, &mut io::stdout()),
+        cli::Shell::Powershell => {
+            generate(Shell::PowerShell, &mut cmd, bin_name, &mut io::stdout())
+        }
+        cli::Shell::Nushell => generate(Nushell, &mut cmd, bin_name, &mut io::stdout()),
     }
 }
-
