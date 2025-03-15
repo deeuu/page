@@ -25,6 +25,8 @@ keyring = "0.10"
 whoami = "1.1"
 clap = { version = "4.2.2", features = ["derive"]}
 arboard = "3.3.2"
+clap_complete = "4.5.46"
+clap_complete_nushell = "4.5.5"
 
 [target.'cfg(unix)'.dependencies]
 fork = "0.1"

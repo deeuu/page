@@ -594,3 +594,37 @@ fn fail_remove_no_entry() {
         .stdout(enter_passphrase_show(""))
         .stderr("Error: entry 'no-entry' not found\n");
 }
+
+#[test]
+fn shell_completion_help() {
+    page()
+        .arg("completion")
+        .arg("-h")
+        .assert()
+        .success()
+        .stdout(predicate::str::contains(
+            "bash, zsh, fish, elvish, powershell, nushell",
+        ));
+}
+
+#[test]
+fn shell_completion_stdout() {
+    page()
+        .arg("completion")
+        .arg("bash")
+        .assert()
+        .success()
+        .stdout(predicate::str::starts_with("_page()"));
+}
+
+#[test]
+fn shell_completion_invalid_shell() {
+    page()
+        .arg("completion")
+        .arg("invalid_shell")
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains(
+            "error: invalid value 'invalid_shell' for '<SHELL>'",
+        ));
+}

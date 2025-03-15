@@ -79,16 +79,16 @@ To use hooks, place executable scripts, named after the hook you want to react o
 
 Existing hooks:
 
-* `pre_load` (called before the password database gets loaded)
-* `post_save` (called after the password database is updated)
+- `pre_load` (called before the password database gets loaded)
+- `post_save` (called after the password database is updated)
 
 These commands trigger hooks:
 
-* `page new` (`pre_load`, `post_save` with event name `new_entry`)
-* `page list` (`pre_load` with event name `list_entries`)
-* `page show` (`pre_load` with event name `show_entry`)
-* `page edit` (`pre_load`, `post_save` with event name `edit_entry`)
-* `page remove` (`pre_load`, `post_save` with event name `remove_entry`)
+- `page new` (`pre_load`, `post_save` with event name `new_entry`)
+- `page list` (`pre_load` with event name `list_entries`)
+- `page show` (`pre_load` with event name `show_entry`)
+- `page edit` (`pre_load`, `post_save` with event name `edit_entry`)
+- `page remove` (`pre_load`, `post_save` with event name `remove_entry`)
 
 Example hook scripts can be found [here](https://github.com/deeuu/page/tree/main/example_hooks).
 
@@ -97,6 +97,10 @@ Example hook scripts can be found [here](https://github.com/deeuu/page/tree/main
 If possible, `page` will try to store the passphrase of your database into the OS keyring. You can run `page keyring check` to see if this works. If you no longer want the password to be stored in the keyring run `page keyring forget`.
 
 To skip the keyring integration, `page` takes a global flag `--no-keyring`.
+
+## Shell completion
+
+Shell completion is available via `page completion <SHELL>` where `SHELL` is one of `bash`, `zsh`, `fish`, `elvish`, `powershell`, or `nushell`. Completion scripts are written to standard output.
 
 ## Usage
 
@@ -108,15 +112,16 @@ A password manager with age encryption
 Usage: page [OPTIONS] <COMMAND>
 
 Commands:
-  init     Initialize the password store
-  new      Add a new entry
-  list     List all known entries
-  show     Decrypt and show an entry
-  edit     Edit an entry
-  remove   Remove an entry
-  info     Display status information
-  keyring  Keyring related commands
-  help     Print this message or the help of the given subcommand(s)
+  init        Initialize the password store
+  new         Add a new entry
+  list        List all known entries
+  show        Decrypt and show an entry
+  edit        Edit an entry
+  remove      Remove an entry
+  info        Display status information
+  keyring     Keyring related commands
+  completion  Generate shell completion
+  help        Print this message or the help of the given subcommand(s)
 
 Options:
   -n, --no-keyring  Disable the keyring integration
