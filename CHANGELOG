@@ -6,6 +6,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
+### Added
+- Shell completion via command `page completion`
+- Dependencies `clap_complete` and `clap_complete_nushell`
+- Basic integration tests for shell completion
+- Formatted README.md
+- Pre-commit hooks
+
 ## [1.1.0] - 2025-01-07
 ### Changed
 - Replaced structopt with clap==4.2.2
