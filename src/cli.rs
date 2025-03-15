@@ -65,8 +65,8 @@ pub enum Cmd {
         #[command(subcommand)]
         cmd: KeyringCmd,
     },
-    /// shell completion
-    Completions { shell: Shell },
+    /// Generate shell completion
+    Completion { shell: Shell },
 }
 
 #[derive(ValueEnum, Clone)]
