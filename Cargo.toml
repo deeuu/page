@@ -27,6 +27,8 @@ clap = { version = "4.2.2", features = ["derive"]}
 arboard = "3.3.2"
 clap_complete = "4.5.46"
 clap_complete_nushell = "4.5.5"
+log = "0.4"
+env_logger = "0.11"
 
 [target.'cfg(unix)'.dependencies]
 fork = "0.1"
