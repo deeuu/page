@@ -3,6 +3,7 @@ use anyhow::{anyhow, Result};
 use std::fs;
 use std::path::Path;
 use std::process::Command;
+use log::{debug, info , warn};
 
 /// Represents callable scripts which can be triggered at certain times
 pub enum Hook {
@@ -42,12 +43,13 @@ impl HookEvent {
 }
 
 pub fn run_hook(hook: &Hook, event: &HookEvent) -> Result<()> {
+
     let path = Path::new(&hooks_dir()?)
         .join(hook.name())
         .display()
         .to_string();
     if fs::metadata(&path).is_ok() {
-        println!("Running {} hook", hook.name());
+        debug!("Running {} hook", hook.name());
         let storage_dir = storage_dir()?;
         let output = Command::new(path)
             .args(&[event.name()])
@@ -58,10 +60,10 @@ pub fn run_hook(hook: &Hook, event: &HookEvent) -> Result<()> {
         let stderr = String::from_utf8(output.stderr)?;
 
         for line in stdout.lines() {
-            println!("{}: {}", hook.name(), line);
+            info!("{}: {}", hook.name(), line);
         }
         for line in stderr.lines() {
-            println!("{}: {}", hook.name(), line);
+            warn!("{}: {}", hook.name(), line);
         }
 
         if !output.status.success() {

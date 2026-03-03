@@ -11,6 +11,10 @@ use cli::{Cli, Cmd, KeyringCmd};
 fn main() -> Result<()> {
     let opt = Cli::parse();
 
+    env_logger::Builder::new()
+        .filter_level(opt.log_level)
+        .init();
+
     match opt.cmd {
         Cmd::Init => commands::init(opt.no_keyring),
         Cmd::New {

@@ -10,18 +10,19 @@ use clap_complete::{generate, Shell};
 use clap_complete_nushell::Nushell;
 use std::fs;
 use std::io;
+use log::{info};
 
 pub fn init(no_keyring: bool) -> Result<(), Error> {
     fs::create_dir_all(storage_dir()?)?;
     let path = entries_file()?;
     if fs::metadata(&path).is_err() {
         fs::File::create(entries_file()?)?;
-        println!("Created entries file {}", path);
+        info!("Created entries file {}", path);
         let passphrase = utilities::get_passphrase(no_keyring)?;
         let entries: Storage = toml::from_str("")?;
         save_entries(passphrase, &entries)?
     } else {
-        println!("Entries file {} already exists", path);
+        info!("Entries file {} already exists", path);
     }
     Ok(())
 }

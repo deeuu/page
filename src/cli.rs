@@ -1,4 +1,5 @@
 use clap::{Parser, Subcommand, ValueEnum};
+use log::LevelFilter;
 
 #[derive(Parser)]
 #[command(bin_name = "page", version, about)]
@@ -9,6 +10,9 @@ pub struct Cli {
     #[arg(short, long)]
     /// Disable the keyring integration
     pub no_keyring: bool,
+
+    #[arg(short, long, default_value = "error")]
+    pub log_level: LevelFilter,
 }
 
 #[derive(Subcommand)]
